@@ -11,6 +11,8 @@ mongoose.connect(`mongodb://aaronsarkissian:${process.env.MANGO_ATLAS_PW}@cluste
 	useMongoClient: true
 });
 
+mongoose.Promise = global.Promise; //To use the default NodeJS promise instead of the mongoose one.
+
 app.use(morgan('dev'));
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
