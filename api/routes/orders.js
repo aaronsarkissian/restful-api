@@ -8,6 +8,7 @@ const Product = require('../models/product');
 router.get('/', (req, res) => {
 	Order.find()
 		.select('produt quantity _id')
+		.populate('product', 'name') //Too show information from other schema, second arg is for filter what to show
 		.exec()
 		.then(docs => {
 			res.status(200).json({
@@ -72,6 +73,7 @@ router.post('/', (req, res) => {
 
 router.get('/:orderID', (req, res) => {
 	Order.findById(req.params.orderID)
+		.populate('product')
 		.exec()
 		.then(order => {
 			if (!order) {
