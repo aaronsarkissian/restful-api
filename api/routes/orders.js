@@ -1,11 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
+const checkAuth = require('../middleware/check-auth');
 
 const Order = require('../models/order');
 const Product = require('../models/product');
 
-router.get('/', (req, res) => {
+router.get('/', checkAuth, (req, res) => {
 	Order.find()
 		.select('produt quantity _id')
 		.populate('product', 'name') //Too show information from other schema, second arg is for filter what to show
@@ -33,7 +34,7 @@ router.get('/', (req, res) => {
 		});
 });
 
-router.post('/', (req, res) => {
+router.post('/', checkAuth, (req, res) => {
 	Product.findById(req.body.productId)
 		.then(product => {
 			if (!product) {
@@ -71,7 +72,7 @@ router.post('/', (req, res) => {
 		});
 });
 
-router.get('/:orderID', (req, res) => {
+router.get('/:orderID', checkAuth, (req, res) => {
 	Order.findById(req.params.orderID)
 		.populate('product')
 		.exec()
@@ -96,7 +97,7 @@ router.get('/:orderID', (req, res) => {
 		});
 });
 
-router.delete('/:orderID', (req, res) => {
+router.delete('/:orderID', checkAuth, (req, res) => {
 	Order.remove({ _id: req.params.orderID })
 		.exec()
 		.then(result => {

@@ -2,13 +2,14 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const multer = require('multer');
+const checkAuth = require('../middleware/check-auth');
 
 const storage = multer.diskStorage({
 	destination: function(req, file, cb){
 		cb(null, './uploads/');
 	},
 	filename: function(req, file, cb) {
-		cb(null, new Date().toISOString() + file.originalname);
+		cb(null, file.originalname);
 	}
 });
 
@@ -27,7 +28,8 @@ const upload = multer({
 	limits: {
 		fileSize: 1024 * 1024 * 5
 	},
-	fileFilter: fileFilter});
+	fileFilter: fileFilter
+});
 
 const Product = require('../models/product');
 
@@ -61,15 +63,16 @@ router.get('/', (req, res) => {
 		});
 });
 
-router.post('/', upload.single('productImage') /*multer upload*/, (req, res) => {
-	console.log(req.file);
+router.post('/', checkAuth, upload.single('productImage') /*multer upload*/, (req, res) => {
+	console.log(req.body);
 	const product = new Product({
 		_id: new mongoose.Types.ObjectId(),
 		name: req.body.name,
 		price: req.body.price,
 		productImage: req.file.path
 	});
-	product.save()
+	product
+		.save()
 		.then(result => {
 			console.log(result);
 			res.status(201).json({
@@ -93,7 +96,7 @@ router.post('/', upload.single('productImage') /*multer upload*/, (req, res) => 
 		});
 });
 
-router.patch('/:productID', (req, res) => {
+router.patch('/:productID', checkAuth, (req, res) => {
 	const id = req.params.productID;
 	const updateOps = {};
 	for (const ops of req.body) {
@@ -118,7 +121,7 @@ router.patch('/:productID', (req, res) => {
 		});
 });
 
-router.get('/:productID', (req, res) => {
+router.get('/:productID', checkAuth, (req, res) => {
 	const id = req.params.productID;
 	Product.findById(id)
 		.select('name price _id productImage')
